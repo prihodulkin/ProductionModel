@@ -1,0 +1,7 @@
+D:\MMCS\AI\ProductionModel\ProductionModel\bin\Debug\ProductionModel.exe.config
+D:\MMCS\AI\ProductionModel\ProductionModel\bin\Debug\ProductionModel.exe
+D:\MMCS\AI\ProductionModel\ProductionModel\bin\Debug\ProductionModel.pdb
+D:\MMCS\AI\ProductionModel\ProductionModel\obj\Debug\ProductionModel.csproj.AssemblyReference.cache
+D:\MMCS\AI\ProductionModel\ProductionModel\obj\Debug\ProductionModel.csproj.CoreCompileInputs.cache
+D:\MMCS\AI\ProductionModel\ProductionModel\obj\Debug\ProductionModel.exe
+D:\MMCS\AI\ProductionModel\ProductionModel\obj\Debug\ProductionModel.pdb

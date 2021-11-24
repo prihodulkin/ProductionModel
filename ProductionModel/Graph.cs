@@ -231,50 +231,26 @@ namespace ProductionModel
             CheckFactContaining(terminalID);
             Stack<int> stack = new Stack<int>();
             Queue<int> queue = new Queue<int>();
-            Stack<int> alternativeWaysStack = new Stack<int>();
-            HashSet<int> visited = new HashSet<int>(finded);
             var noSolution = false;
-            stack.Push(terminalID);
+            stack.Push(rules[terminalID].First().Consequence.FactID);
             while (stack.Count > 0)
             {
                 var id = stack.Pop();
-                if (visited.Contains(id)||finded.Contains(id)) continue;
+                if (finded.Contains(id)) continue;
                 if (!rules.ContainsKey(id)&&!initial.Contains(id))
                 {
-                    if (alternativeWaysStack.Count > 0)
-                    {
-                        var way = alternativeWaysStack.Pop();
-                        if (alternativeWaysStack.Count == 0)
-                        {
-                            noSolution = true;
-                            break;
-                        }
-                        while (stack.Pop() != way) ;
-                        stack.Push(alternativeWaysStack.Peek());
-                        continue;
-                    }
                     noSolution = true;
                     break;
                 }
-                var rulesSet = rules[id];
-                var rule = rulesSet.Last(); //!!!!!!!!!!
-                if (rulesSet.Count > 1)
-                {
-                    foreach(var r in rulesSet)
-                    {
-                        alternativeWaysStack.Push(r.Consequence.FactID);
-                    }
-                }
+                var rule = rules[id].First();
                 var notFinded= rule.Causes.Where(f => !finded.Contains(f.FactID));
                 if (notFinded.Count() == 0)
                 {
-                    visited.Remove(id);
                     finded.Add(rule.Consequence.FactID);
                     result.Add(new SearchSnapshot(new HashSet<Fact>(finded.Select(f => facts[f])), rule));
                 }
                 else
                 {
-                    visited.Add(id);
                     stack.Push(id);
                     foreach(var f in notFinded)
                     {

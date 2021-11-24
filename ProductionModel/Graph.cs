@@ -231,21 +231,66 @@ namespace ProductionModel
             CheckFactContaining(terminalID);
             Stack<int> stack = new Stack<int>();
             Queue<int> queue = new Queue<int>();
+            Dictionary<int, HashSet<Rule>> alternativeRules = new Dictionary<int, HashSet<Rule>>(
+               rules);
+            Dictionary<int, Rule> currentRule = new Dictionary<int, Rule>();
+            var branch = new HashSet<int>();
             var noSolution = false;
             stack.Push(rules[terminalID].First().Consequence.FactID);
             while (stack.Count > 0)
             {
                 var id = stack.Pop();
-                if (finded.Contains(id)) continue;
-                if (!rules.ContainsKey(id)&&!initial.Contains(id))
+                if (!alternativeRules.ContainsKey(id)&&!initial.Contains(id))
                 {
-                    noSolution = true;
-                    break;
+                    while (stack.Count > 0 && alternativeRules[stack.Peek()].Count == 0)
+                    {
+                        branch.Remove(stack.Pop());
+                    }
+                    if (stack.Count > 0)
+                    {
+                        id = stack.Peek();
+                        var rulesS = alternativeRules[id];
+                        currentRule[id] = rulesS.Last();
+                        rulesS.Remove(rulesS.Last());
+                    }
+                    else
+                    {
+                        noSolution = true;
+                        break;
+                    }
                 }
-                var rule = rules[id].First();
+                if (!currentRule.ContainsKey(id))
+                {
+                    var rulesS = alternativeRules[id];
+                    currentRule[id] = rulesS.Last();
+                    rulesS.Remove(rulesS.Last());
+                }
+                var rule = currentRule[id];
+                if (branch.Contains(rule.RuleID)&&rule.Causes.All(f=>!finded.Contains(f.FactID)))
+                {
+                    while(stack.Count>0&&alternativeRules[stack.Peek()].Count==0)
+                    {
+                        branch.Remove(stack.Pop());
+                    }
+                    if (stack.Count > 0)
+                    {
+                        id = stack.Peek();
+                        var rulesS = alternativeRules[id];
+                        currentRule[id] = rulesS.Last();
+                        rulesS.Remove(rulesS.Last());
+                        rule = currentRule[id];
+                    }
+                    else
+                    {
+                        noSolution = true;
+                        break;
+                    }
+                }
+                branch.Add(rule.RuleID);
                 var notFinded= rule.Causes.Where(f => !finded.Contains(f.FactID));
                 if (notFinded.Count() == 0)
                 {
+                    branch.Remove(rule.RuleID);
                     finded.Add(rule.Consequence.FactID);
                     result.Add(new SearchSnapshot(new HashSet<Fact>(finded.Select(f => facts[f])), rule));
                 }

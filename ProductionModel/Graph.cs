@@ -133,6 +133,7 @@ namespace ProductionModel
             foreach(var f in Parser.ParseFacts(factsPath))
             {
                 AddFact(f);
+                rules[f.FactID] = new HashSet<Rule>();
             }
             foreach(var r in Parser.ParseRules(rulesPath, facts))
             {
@@ -175,15 +176,7 @@ namespace ProductionModel
             {
                 CheckFactContaining(fact);
             }
-            if (rules.ContainsKey(rule.Consequence.FactID))
-            {
-                rules[rule.Consequence.FactID].Add(rule);
-            }
-            else
-            {
-                rules.Add(rule.Consequence.FactID, new HashSet<Rule>() { rule});
-            }
-            
+            rules[rule.Consequence.FactID].Add(rule);       
         }
 
         public List<SearchSnapshot> ForwardSearch(IEnumerable<int> initialFactsID, HashSet<int> terminalsID)
@@ -236,19 +229,26 @@ namespace ProductionModel
             Dictionary<int, Rule> currentRule = new Dictionary<int, Rule>();
             var branch = new HashSet<int>();
             var noSolution = false;
-            stack.Push(rules[terminalID].First().Consequence.FactID);
+            if (rules.ContainsKey(terminalID))
+            {
+                stack.Push(rules[terminalID].Last().Consequence.FactID);
+            }
+            else
+            {
+                return new List<SearchSnapshot>();
+            } 
             while (stack.Count > 0)
             {
                 var id = stack.Pop();
                 if (!alternativeRules.ContainsKey(id)&&!initial.Contains(id))
                 {
-                    while (stack.Count > 0 && alternativeRules[stack.Peek()].Count == 0)
+                    while (stack.Count > 0 &&  alternativeRules[stack.Peek()].Count == 0)
                     {
                         branch.Remove(stack.Pop());
                     }
                     if (stack.Count > 0)
                     {
-                        id = stack.Peek();
+                        id = stack.Pop();
                         var rulesS = alternativeRules[id];
                         currentRule[id] = rulesS.Last();
                         rulesS.Remove(rulesS.Last());
@@ -262,8 +262,17 @@ namespace ProductionModel
                 if (!currentRule.ContainsKey(id))
                 {
                     var rulesS = alternativeRules[id];
-                    currentRule[id] = rulesS.Last();
-                    rulesS.Remove(rulesS.Last());
+                    if (rulesS.Count > 0)
+                    {
+                        currentRule[id] = rulesS.Last();
+                        rulesS.Remove(rulesS.Last());
+                    }
+                    else
+                    {
+                        noSolution = true;
+                        break;
+                    }
+                   
                 }
                 var rule = currentRule[id];
                 if (branch.Contains(rule.RuleID)&&rule.Causes.All(f=>!finded.Contains(f.FactID)))
@@ -274,7 +283,7 @@ namespace ProductionModel
                     }
                     if (stack.Count > 0)
                     {
-                        id = stack.Peek();
+                        id = stack.Pop();
                         var rulesS = alternativeRules[id];
                         currentRule[id] = rulesS.Last();
                         rulesS.Remove(rulesS.Last());

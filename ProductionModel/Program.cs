@@ -47,12 +47,28 @@ namespace ProductionModel
             }
         }
 
+        static void Run(string[] args)
+        {
+            if (args[0] == "f")
+            {
+                PrintForwardSearchResult(new int[] { 1, 2, 3, 4 }, args.Skip(1).Select(x => int.Parse(x)));
+            } else if (args[0] == "r")
+            {
+                PrintReverseSearchResult(new int[] { 1, 2, 3, 4 }, int.Parse(args[1]));
+            }
+            else
+            {
+                PrintReverseSearchResult(new int[] { 1, 2, 3, 4 }, int.Parse(args[0]));
+            }
+            Console.ReadKey();
+        }
 
         static void Main(string[] args)
         {
-            //PrintForwardSearchResult(new int[] { 1, 2, 3, 4 }, new int[] { 51 });
-            PrintReverseSearchResult(new int[] { 1, 2, 3, 4 },  100);
+           // PrintForwardSearchResult(new int[] { 1, 2, 4 }, new int[] { 100});
+            PrintReverseSearchResult(new int[] { 1, 2, 3,  4 }, 100);
             Console.ReadKey();
+            //Run(args);
         }
     }
 }
